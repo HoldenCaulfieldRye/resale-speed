@@ -96,7 +96,7 @@ ul.plain li::marker{color:var(--accent)}
     <div class="legend"><span><i style="background:var(--mine)"></i>Your brands</span><span><i style="background:var(--peer)"></i>Lookalikes</span><span><i style="background:var(--bench)"></i>Miu Miu benchmark</span></div>
     <div class="chart" id="chart" role="img" aria-label="Bar chart of percent of listings sold within 7 days by brand"></div>
     <div class="axis"><span></span><div><span>0%</span><span>5%</span><span>10%</span><span>15%</span><span>20%</span></div><span></span></div>
-    <p class="note">Right-hand figure: % sold within 7 days, then median listing price. Brands with fewer than 25 eligible listings are left out.</p>
+    <p class="note">Right-hand figure: % sold within 7 days, then median listing price (brighter coral = pricier). Brands with fewer than 25 eligible listings are left out.</p>
   </div>
 </section>
 
@@ -160,11 +160,13 @@ ul.plain li::marker{color:var(--accent)}
 const D=[["Dôen",18,200],["Sézane",17,135],["Orseund Iris",15,200],["Paloma Wool",14,200],["Realisation Par",14,150],["Lemaire",13,661],["Maison Margiela",13,350],["Khaite",12,450],["The Row",11,468],["Toteme",9,349],["St. Agni",9,197],["Staud",7,198],["Mirror Palais",7,400],["Cult Gaia",6,250],["Reformation",5,150],["Simone Rocha",5,325],["Cecilie Bahnsen",5,400],["Miu Miu",5,1121],["Ganni",5,165],["Jacquemus",5,450],["Djerf Avenue",4,120],["Guizio",3,150],["Rouje",3,150],["LoveShackFancy",2,180],["For Love & Lemons",2,138],["Posse",2,158],["Ulla Johnson",2,185],["Sandy Liang",2,225],["Miaou",1,148],["Christopher Esber",1,355],["House of Sunny",1,120],["Buci",0,255],["Nanushka",0,185]];
 const MINE=new Set(["Orseund Iris","Paloma Wool","Realisation Par","Guizio","Buci"]);
 const el=document.getElementById("chart");
+const lo=Math.log(Math.min(...D.map(d=>d[2]))),hi=Math.log(Math.max(...D.map(d=>d[2])));
+const heat=v=>Math.round((Math.log(v)-lo)/(hi-lo)*100);
 for(const [n,p,price] of D){
   const r=document.createElement("div");
   const kind=MINE.has(n)?"mine":n==="Miu Miu"?"bench":"peer";
   r.className="row "+(kind==="mine"?"mine":"");
-  r.innerHTML=`<div class="name" title="${n}">${n}</div><div class="track"><div class="bar" style="width:${p/20*100}%;background:var(--${kind})"></div></div><div class="val"><b>${p}%</b> $${price}</div>`;
+  r.innerHTML=`<div class="name" title="${n}">${n}</div><div class="track"><div class="bar" style="width:${p/20*100}%;background:var(--${kind})"></div></div><div class="val"><b>${p}%</b> <span style="color:color-mix(in oklch,var(--accent) ${heat(price)}%,var(--peer));font-weight:${heat(price)>60?600:400}">$${price}</span></div>`;
   el.appendChild(r);
 }
 const G=[["Linked to faster sales · strongest first",[["Price at 0.6x the brand median or less",1.66],["Ask under 35% of retail",1.6],["Bags",1.57],["Jackets & coats",1.53],["One-size items",1.46],["Ask 35–55% of retail",1.45],["Brown",1.44],["Price at 0.6–0.9x the median",1.33],["Green",1.28],["Sweaters",1.27],["Used, like new",1.25],["4–6 photos",1.23],["Size S or M",1.15]]],["No real difference",[["Day of the week listed",1.0],["Listed morning or afternoon",1.05],["Black or blue",1.0],["Tops, skirts, shoes",1.07]]],["Linked to slower sales · weakest first",[["List in the evening",0.85],["New with tags",0.86],["XS or smaller",0.82],["L / 10 or larger",0.78],["Description over 400 characters",0.77],["Dresses",0.74],["Ask 75%+ of retail",0.7],["10+ photos",0.7],["Jeans",0.7],["Pink",0.7],["Selling as a reseller (6+ listings)",0.69],["Price above 1.3x the median",0.63],["Pants & jumpsuits",0.55],["Adding a video",0.55],["Shorts",0.41]]]];
