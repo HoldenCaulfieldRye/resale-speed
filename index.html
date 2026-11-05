@@ -106,8 +106,9 @@ ul.plain li::marker{color:var(--accent)}
   <div class="wrap">
     <div class="eyebrow">Over time · average of the 9 fastest brands · 6 months of listings</div>
     <h2>Share of listings still unsold, by days since listing</h2>
-    <div class="legend"><span><i style="background:var(--mine)"></i>Counting deleted listings as unsold</span><span><i style="background:var(--peer)"></i>Only listings still on Poshmark</span></div>
+    <div class="legend"><span><i style="background:var(--mine)"></i>Unsold (high estimate)</span><span><i style="background:var(--peer)"></i>Unsold (low estimate)</span></div>
     <div class="surv" id="surv" role="img" aria-label="Line chart of the average share of listings still unsold by days since listing across 9 brands"><div class="tip" id="survtip"></div></div>
+    <p class="note">Poshmark hides listings once they're deleted, so we can't tell how many were deleted unsold. The true share lies between the two lines.</p>
   </div>
 </section>
 
@@ -176,7 +177,7 @@ s.innerHTML=g;box.prepend(s);const xh=s.querySelector("#xh");
 const hide=()=>{tip.style.display="none";xh.setAttribute("visibility","hidden")};
 s.addEventListener("pointermove",ev=>{const r=s.getBoundingClientRect(),sx=(ev.clientX-r.left)/r.width*W,i=Math.round((sx-L)/pw*n);if(i<0||i>n)return hide();
 xh.setAttribute("x1",x(i));xh.setAttribute("x2",x(i));xh.setAttribute("visibility","visible");
-tip.innerHTML=`<div><span style="color:var(--muted)">Day ${i} · unsold</span></div><div><span style="color:var(--mine)">Deleted = unsold</span><b>${Math.round(COR[i]*100)}%</b></div><div><span style="color:var(--muted)">Still on Poshmark</span><b>${Math.round(OBS[i]*100)}%</b></div>`;
+tip.innerHTML=`<div><span style="color:var(--muted)">Day ${i} · unsold</span></div><div><span style="color:var(--mine)">High estimate</span><b>${Math.round(COR[i]*100)}%</b></div><div><span style="color:var(--muted)">Low estimate</span><b>${Math.round(OBS[i]*100)}%</b></div>`;
 tip.style.display="block";const bx=box.getBoundingClientRect(),px=ev.clientX-bx.left;tip.style.left=(px>bx.width/2?px-tip.offsetWidth-14:px+14)+"px";tip.style.top="10px";});
 s.addEventListener("pointerleave",hide);})();
 </script>
