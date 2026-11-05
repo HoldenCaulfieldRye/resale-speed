@@ -1,0 +1,198 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}</style>
+<title>Resale Speed Index</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: stacked slide bands alternating paper/white; one ranked bar chart is the centrepiece */
+:root{
+  --bg:#ffffff; --paper:#f8f5f0; --ink:#2a2420; --muted:#76706a; --line:#e6e1da;
+  --accent:#ff8370; --accent-soft:rgba(255,131,112,.14); --mine:#d9533f; --peer:#b9b0a6; --bench:#4a4440;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Inter",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1a1715; --paper:#221e1b; --ink:#f1ece6; --muted:#a49d95; --line:#38322d;
+  --accent:#ff8f7e; --accent-soft:rgba(255,143,126,.16); --mine:#ff8f7e; --peer:#5c544d; --bench:#cfc7be; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1a1715; --paper:#221e1b; --ink:#f1ece6; --muted:#a49d95; --line:#38322d;
+  --accent:#ff8f7e; --accent-soft:rgba(255,143,126,.16); --mine:#ff8f7e; --peer:#5c544d; --bench:#cfc7be; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;font-feature-settings:"cv11","ss01"}
+.band{padding-block:72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line)}
+.band.warm{background:var(--paper)}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-family:var(--mono);font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.18em;color:var(--muted)}
+.eyebrow::before{content:"▸ ";color:var(--accent)}
+h1,h2{font-family:var(--display);font-weight:700;letter-spacing:-.02em;text-wrap:balance;margin:0;line-height:1.08}
+h1{font-size:clamp(2.4rem,6vw,4rem)}
+h2{font-size:clamp(1.7rem,3.6vw,2.4rem)}
+h3{font-size:1.05rem;font-weight:600;margin:0}
+p{margin:0;max-width:65ch}
+.lead{font-size:1.15rem;color:var(--muted)}
+.hero{position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(70% 60% at 50% 0%,var(--accent-soft),transparent)}
+.hero .wrap{position:relative}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:8px}
+.fact{border-top:2px solid var(--ink);padding-top:10px}
+.fact b{display:block;font-family:var(--mono);font-size:1.6rem;font-weight:500;font-variant-numeric:tabular-nums}
+.fact span{font-size:.88rem;color:var(--muted)}
+.defn{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.defn div{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.defn p{font-size:.92rem;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.85rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.chart{display:flex;flex-direction:column;gap:5px}
+.row{display:grid;grid-template-columns:150px 1fr 96px;align-items:center;gap:10px;font-size:.9rem}
+.row .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row.mine .name{font-weight:600;color:var(--mine)}
+.row .track{height:18px;position:relative;border-left:1px solid var(--line)}
+.row .bar{height:100%;border-radius:0 4px 4px 0;min-width:2px}
+.row .val{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;color:var(--muted)}
+.row .val b{color:var(--ink);font-weight:500}
+.axis{display:grid;grid-template-columns:150px 1fr 96px;gap:10px;font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.axis div{display:flex;justify-content:space-between}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.card .pct{font-family:var(--mono);font-size:1.4rem;font-weight:500;font-variant-numeric:tabular-nums}
+.card.fast .pct{color:var(--mine)}
+.card p{font-size:.86rem;color:var(--muted)}
+.tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--ink);align-self:flex-start}
+.tag.slow{background:var(--line)}
+ul.plain{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:8px;max-width:70ch}
+ul.plain li::marker{color:var(--accent)}
+.note{font-size:.82rem;color:var(--muted)}
+.drivers{display:flex;flex-direction:column;gap:18px}
+.dgroup{display:flex;flex-direction:column;gap:5px}
+.dgroup h3{font-family:var(--mono);font-size:.74rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.drow{display:grid;grid-template-columns:minmax(0,190px) 1fr 52px;gap:10px;align-items:center;font-size:.9rem}
+.dtrack{position:relative;height:16px}
+.dtrack::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;border-left:1px solid var(--ink);opacity:.5}
+.dbar{position:absolute;top:0;height:100%}
+.dbar.up{left:50%;background:var(--mine);border-radius:0 4px 4px 0}
+.dbar.down{right:50%;background:var(--peer);border-radius:4px 0 0 4px}
+.drow .val{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+@media (max-width:520px){.row,.axis{grid-template-columns:104px 1fr 84px}.band{padding-block:52px}}
+</style>
+
+<section class="band hero">
+  <div class="wrap">
+    <div class="eyebrow">Poshmark resale · listings $100+ · Oct 13 – Nov 4, 2026</div>
+    <h1>Which designer brands sell fastest secondhand</h1>
+    <p class="lead">Orseund Iris, Realisation Par and Paloma Wool sell about 3x faster than Miu Miu. Guizio and Buci sell slowly. Dôen, Sézane, Lemaire, Margiela, Khaite and The Row are lookalikes that sell at least as fast.</p>
+    <div class="facts">
+      <div class="fact"><b>47,680</b><span>listings checked</span></div>
+      <div class="fact"><b>36</b><span>brands</span></div>
+      <div class="fact"><b>18%</b><span>fastest brand: share sold within 7 days</span></div>
+      <div class="fact"><b>5%</b><span>Miu Miu benchmark</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band warm">
+  <div class="wrap">
+    <div class="eyebrow">Method</div>
+    <h2>Speed means time from listing to sale</h2>
+    <div class="defn">
+      <div><h3>The metric</h3><p>Of all $100+ listings at least 7 days old, the share that sold within 7 days of going live. Times come from Poshmark's own listed and sold timestamps.</p></div>
+      <div><h3>Excluded</h3><p>Items sold under 1 hour after listing. These are mostly Posh Show or reserved sales, where a listing is created for a buyer who already agreed to buy.</p></div>
+      <div><h3>Why not sales volume</h3><p>Volume rewards brands with lots of supply. Chanel sells more pieces per day than anyone but has so many listings that each one waits longer.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="eyebrow">Ranking</div>
+    <h2>Share of listings sold within 7 days</h2>
+    <div class="legend"><span><i style="background:var(--mine)"></i>Your brands</span><span><i style="background:var(--peer)"></i>Lookalikes</span><span><i style="background:var(--bench)"></i>Miu Miu benchmark</span></div>
+    <div class="chart" id="chart" role="img" aria-label="Bar chart of percent of listings sold within 7 days by brand"></div>
+    <div class="axis"><span></span><div><span>0%</span><span>5%</span><span>10%</span><span>15%</span><span>20%</span></div><span></span></div>
+    <p class="note">Right-hand figure: % sold within 7 days, then median listing price. Brands with fewer than 25 eligible listings are left out.</p>
+  </div>
+</section>
+
+<section class="band warm">
+  <div class="wrap">
+    <div class="eyebrow">Your brands</div>
+    <h2>Three sell fast, two are slow</h2>
+    <div class="cards">
+      <div class="card fast"><div class="top"><h3>Orseund Iris</h3><span class="pct">15%</span></div><span class="tag">Fast</span><p>$200 median, 67 listings. Third-fastest of all 36 brands.</p></div>
+      <div class="card fast"><div class="top"><h3>Paloma Wool</h3><span class="pct">14%</span></div><span class="tag">Fast</span><p>$200 median, 146 listings. The largest sample of the three fast ones.</p></div>
+      <div class="card fast"><div class="top"><h3>Realisation Par</h3><span class="pct">14%</span></div><span class="tag">Fast, few listings</span><p>$150 median, 42 listings. Few come up, but most of those sell.</p></div>
+      <div class="card"><div class="top"><h3>Guizio</h3><span class="pct">3%</span></div><span class="tag slow">Slow</span><p>$150 median, 177 listings. Plenty of supply, few buyers at $100+.</p></div>
+      <div class="card"><div class="top"><h3>Buci</h3><span class="pct">0%</span></div><span class="tag slow">Slow</span><p>$255 median, 41 listings. None sold within a week.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="eyebrow">Lookalikes</div>
+    <h2>Brands that sell at least as fast</h2>
+    <div class="cards">
+      <div class="card fast"><div class="top"><h3>Dôen</h3><span class="pct">18%</span></div><p>$200 median. Fastest overall, with 1,766 listings measured.</p></div>
+      <div class="card fast"><div class="top"><h3>Sézane</h3><span class="pct">17%</span></div><p>$135 median. Lots of supply and still sells quickly.</p></div>
+      <div class="card fast"><div class="top"><h3>Lemaire</h3><span class="pct">13%</span></div><p>$660 median. Highest price among the fast brands.</p></div>
+      <div class="card fast"><div class="top"><h3>Maison Margiela</h3><span class="pct">13%</span></div><p>$350 median.</p></div>
+      <div class="card fast"><div class="top"><h3>Khaite</h3><span class="pct">12%</span></div><p>$450 median.</p></div>
+      <div class="card fast"><div class="top"><h3>The Row</h3><span class="pct">11%</span></div><p>$468 median.</p></div>
+    </div>
+    <p class="note">Slow despite the hype: Ulla Johnson, LoveShackFancy, For Love &amp; Lemons and Sandy Liang (2%), Miaou and Christopher Esber (1%), Nanushka (0%).</p>
+  </div>
+</section>
+
+<section class="band warm">
+  <div class="wrap">
+    <div class="eyebrow">Item level · 9 fastest brands · 9,253 listings</div>
+    <h2>What makes a $100+ item sell within a week</h2>
+    <p class="lead">Ranked from the biggest help to the biggest hurt. Each bar compares items with that trait to their own brand's 7-day sell rate (17% on average). Right of the line sells faster, left sells slower.</p>
+    <div class="drivers" id="drivers"></div>
+    <div class="cards">
+      <div class="card"><h3>Listings sell early or not at all</h3><p>64% of eventual sales happen in the first 7 days. 71% of fast sales came after the seller cut the price, vs 84% of slower sales.</p></div>
+      <div class="card"><h3>Extra effort didn't help</h3><p>10+ photos, a video or a long description went with slower sales, even among similarly priced items. This is a correlation, not proof that photos hurt.</p></div>
+      <div class="card"><h3>Season matters</h3><p>Data is from October–November, which lifts coats and sweaters and hurts shorts. Expect these to flip in spring.</p></div>
+    </div>
+    <p class="note">Data is from 9 brands: Dôen, Sézane, Orseund Iris, Paloma Wool, Realisation Par, Lemaire, Maison Margiela, Khaite and The Row. "Resellers" are sellers with 6+ of these listings in the data.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <div class="eyebrow">Limits</div>
+    <h2>What this does not cover</h2>
+    <ul class="plain">
+      <li><b>Depop isn't measured.</b> Its search hides sold items, so sold history can only be pulled shop by shop, and that sample was too thin (5 or fewer sales per brand).</li>
+      <li><b>Small samples:</b> Realisation Par (42 listings), Buci (41) and Orseund Iris (67). Treat a gap of 1–2 points as noise.</li>
+      <li><b>Chanel, Prada and Gucci</b> have too many listings to reach a 7-day window in this crawl.</li>
+      <li><b>Sale time</b> is when Poshmark marked the item sold out. Offers accepted overnight can shift this by a few hours.</li>
+    </ul>
+  </div>
+</section>
+
+<script>
+const D=[["Dôen",18,200],["Sézane",17,135],["Orseund Iris",15,200],["Paloma Wool",14,200],["Realisation Par",14,150],["Lemaire",13,661],["Maison Margiela",13,350],["Khaite",12,450],["The Row",11,468],["Toteme",9,349],["St. Agni",9,197],["Staud",7,198],["Mirror Palais",7,400],["Cult Gaia",6,250],["Reformation",5,150],["Simone Rocha",5,325],["Cecilie Bahnsen",5,400],["Miu Miu",5,1121],["Ganni",5,165],["Jacquemus",5,450],["Djerf Avenue",4,120],["Guizio",3,150],["Rouje",3,150],["LoveShackFancy",2,180],["For Love & Lemons",2,138],["Posse",2,158],["Ulla Johnson",2,185],["Sandy Liang",2,225],["Miaou",1,148],["Christopher Esber",1,355],["House of Sunny",1,120],["Buci",0,255],["Nanushka",0,185]];
+const MINE=new Set(["Orseund Iris","Paloma Wool","Realisation Par","Guizio","Buci"]);
+const el=document.getElementById("chart");
+for(const [n,p,price] of D){
+  const r=document.createElement("div");
+  const kind=MINE.has(n)?"mine":n==="Miu Miu"?"bench":"peer";
+  r.className="row "+(kind==="mine"?"mine":"");
+  r.innerHTML=`<div class="name" title="${n}">${n}</div><div class="track"><div class="bar" style="width:${p/20*100}%;background:var(--${kind})"></div></div><div class="val"><b>${p}%</b> $${price}</div>`;
+  el.appendChild(r);
+}
+const G=[["Do · biggest impact first",[["Price at 0.6x the brand median or less",1.66],["Ask under 35% of retail",1.6],["Bags",1.57],["Jackets & coats",1.53],["One-size items",1.46],["Ask 35–55% of retail",1.45],["Brown",1.44],["Price at 0.6–0.9x the median",1.33],["Green",1.28],["Sweaters",1.27],["Used, like new",1.25],["4–6 photos",1.23],["Size S or M",1.15]]],["No real difference",[["Day of the week listed",1.0],["Listed morning or afternoon",1.05],["Black or blue",1.0],["Tops, skirts, shoes",1.07]]],["Don't · least harmful first",[["List in the evening",0.85],["New with tags",0.86],["XS or smaller",0.82],["L / 10 or larger",0.78],["Description over 400 characters",0.77],["Dresses",0.74],["Ask 75%+ of retail",0.7],["10+ photos",0.7],["Jeans",0.7],["Pink",0.7],["Selling as a reseller (6+ listings)",0.69],["Price above 1.3x the median",0.63],["Pants & jumpsuits",0.55],["Adding a video",0.55],["Shorts",0.41]]]];
+const dv=document.getElementById("drivers");
+for(const [t,rows] of G){
+  const g=document.createElement("div");g.className="dgroup";g.innerHTML=`<h3>${t}</h3>`;
+  for(const [l,v] of rows){
+    const w=Math.min(Math.abs(v-1)/0.7*50,50);
+    const d=document.createElement("div");d.className="drow";
+    d.innerHTML=`<div>${l}</div><div class="dtrack"><div class="dbar ${v>=1?"up":"down"}" style="width:${w}%"></div></div><div class="val">${v.toFixed(2)}x</div>`;
+    g.appendChild(d);
+  }
+  dv.appendChild(g);
+}
+</script>
+</html>
