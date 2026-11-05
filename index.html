@@ -108,7 +108,6 @@ ul.plain li::marker{color:var(--accent)}
     <h2>Share of listings still unsold, by days since listing</h2>
     <div class="legend"><span><i style="background:var(--mine)"></i>Unsold (high estimate)</span><span><i style="background:var(--peer)"></i>Unsold (low estimate)</span></div>
     <div class="surv" id="surv" role="img" aria-label="Line chart of the average share of listings still unsold by days since listing across 9 brands"><div class="tip" id="survtip"></div></div>
-    <p class="note">Poshmark hides listings once they're deleted, so we can't tell how many were deleted unsold. The true share lies between the two lines. Brands drop out of the average as their listings run out: all 9 to day 113, Sézane alone after day 182.</p>
   </div>
 </section>
 
@@ -167,7 +166,7 @@ const OBS=[1.0, 0.962, 0.934, 0.91, 0.892, 0.878, 0.86, 0.845, 0.832, 0.819, 0.8
 const x=d=>L+d/n*pw,y=v=>T+(1-v)*ph,ns="http://www.w3.org/2000/svg",P=a=>a.map((v,i)=>(i?"L":"M")+x(i).toFixed(1)+","+y(v).toFixed(1)).join("");
 const s=document.createElementNS(ns,"svg");s.setAttribute("viewBox",`0 0 ${W} ${H}`);
 let g="";for(const v of [0,.25,.5,.75,1])g+=`<line x1="${L}" x2="${L+pw}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="12" fill="var(--muted)" font-family="var(--mono)">${v}</text>`;
-for(let d=0;d<=n;d+=30)g+=`<text x="${x(d)}" y="${H-12}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="var(--mono)">${d}d</text>`;
+for(let m=0;m*30.44<=n;m++)g+=`<text x="${x(m*30.44)}" y="${H-12}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="var(--mono)">${m}mo</text>`;
 g+=`<path d="${P(COR)}L${[...OBS].reverse().map((v,k)=>x(n-k).toFixed(1)+","+y(v).toFixed(1)).join("L")}Z" fill="var(--accent-soft)"/>`;
 g+=`<path d="${P(OBS)}" fill="none" stroke="var(--peer)" stroke-width="2" stroke-linejoin="round"/><path d="${P(COR)}" fill="none" stroke="var(--mine)" stroke-width="2.5" stroke-linejoin="round"/>`;
 for(const d of [30,90]){for(const [a,c] of [[COR,"mine"],[OBS,"peer"]]){const v=a[d],up=a===COR;g+=`<circle cx="${x(d)}" cy="${y(v)}" r="4.5" fill="var(--${c})" stroke="var(--bg)" stroke-width="2"/><text x="${x(d)}" y="${y(v)+(up?-12:22)}" text-anchor="middle" font-size="12.5" fill="var(--ink)" font-family="var(--mono)">${Math.round(v*100)}%</text>`;}}
