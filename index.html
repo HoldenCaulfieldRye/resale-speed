@@ -76,14 +76,18 @@ ul.plain li::marker{color:var(--accent)}
 .surv{position:relative}.surv svg{display:block;width:100%;height:auto;overflow:visible}
 .surv .tip{position:absolute;pointer-events:none;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.8rem;box-shadow:0 4px 14px rgba(0,0,0,.12);display:none;min-width:170px}
 .surv .tip div{display:flex;justify-content:space-between;gap:12px}.surv .tip b{font-family:var(--mono);font-weight:500}
-.survhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;position:relative}
-.fright{display:flex;align-items:center;gap:12px}
 #fstat{font-size:.82rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .fbtn{font:inherit;font-size:.85rem;font-weight:500;display:inline-flex;gap:8px;align-items:center;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
 .fbtn:hover{border-color:var(--muted)}
+.fbtn{flex:none;margin-top:4px}
+.fbtn[aria-expanded=true]{background:var(--accent-soft);border-color:var(--mine)}
 .fbtn svg{width:14px;height:14px}
 #fcount{background:var(--mine);color:var(--bg);border-radius:999px;padding:0 7px;font-size:.72rem;font-family:var(--mono)}
-.fpanel{position:absolute;right:0;top:calc(100% + 8px);z-index:5;width:min(440px,calc(100vw - 32px));max-height:70vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);padding:16px;display:flex;flex-direction:column;gap:14px}
+.fpanel[hidden]{display:none}
+.survtitle{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.fpanel{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:16px}
+#fgroups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px 28px}
+.survfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .fgroup h4{margin:0 0 6px;font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font:inherit;font-size:.82rem;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
@@ -121,10 +125,10 @@ ul.plain li::marker{color:var(--accent)}
 <section class="band warm">
   <div class="wrap">
     <div class="eyebrow">Over time · average of the 9 fastest brands</div>
-    <h2>Share of listings still unsold, by days since listing</h2>
-    <div class="survhead"><div class="legend"><span><i style="background:var(--mine)"></i>Unsold (high estimate)</span><span><i style="background:var(--peer)"></i>Unsold (low estimate)</span></div><div class="fright"><span id="fstat"></span><button type="button" class="fbtn" id="fbtn" aria-expanded="false" aria-controls="fpanel"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M4.5 8h7M7 12h2"/></svg>Filters<span id="fcount" hidden></span></button></div>
-      <div class="fpanel" id="fpanel" hidden><div id="fgroups" style="display:flex;flex-direction:column;gap:14px"></div><div class="ffoot"><span>Pick none in a group to include all</span><button type="button" id="freset">Reset</button></div></div></div>
+    <div class="survtitle"><h2>Share of listings still unsold, by days since listing</h2><button type="button" class="fbtn" id="fbtn" aria-expanded="false" aria-controls="fpanel"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M4.5 8h7M7 12h2"/></svg>Filters<span id="fcount" hidden></span></button></div>
+    <div class="fpanel" id="fpanel" hidden><div id="fgroups"></div><div class="ffoot"><span>Pick none in a group to include all</span><button type="button" id="freset">Reset</button></div></div>
     <div class="surv" id="surv" role="img" aria-label="Line chart of the average share of listings still unsold by days since listing across 9 brands"><div class="tip" id="survtip"></div></div>
+    <div class="survfoot"><div class="legend"><span><i style="background:var(--mine)"></i>Unsold (high estimate)</span><span><i style="background:var(--peer)"></i>Unsold (low estimate)</span></div><span id="fstat"></span></div>
   </div>
 </section>
 
@@ -189,7 +193,7 @@ function compute(){const per=Array.from({length:FD.dims.b.length},()=>[]);let cn
   for(const I of per){if(!I.length)continue;const T=I.map(i=>[C.t[i]/10,C.e[i],1]),ac=new Array(MAXD+1).fill(0);
     for(const i of I)if(C.a[i]<=MAXD)ac[C.a[i]]++;let rate=0;for(let a=7;a<35;a++)rate+=ac[a];rate/=28;
     const o=km(T.slice());if(o.length<2)continue;const M=T.slice();for(let a=7;a<o.length;a++){const m=rate-ac[a];if(m>0)M.push([a+.5,0,m])}
-    ob.push(o);co.push(km(M).slice(0,o.length))}
+    const c=km(M).slice(0,o.length);while(c.length<o.length)c.push(c[c.length-1]);ob.push(o);co.push(c)}
   const chain=L=>{const A=[1],NB=[L.length];for(let d=1;d<=MAXD;d++){const B=L.filter(s=>d<s.length&&s[d-1]>0);if(!B.length)break;A.push(A[d-1]*B.reduce((t,s)=>t+s[d]/s[d-1],0)/B.length);NB.push(B.length)}return [A,NB]};
   const [O,NB]=chain(ob),[Cc]=chain(co);return {O,C:Cc,NB,cnt,brands:ob.length}}
 const box=document.getElementById("surv"),tip=document.getElementById("survtip"),W=900,H=440,L=44,R=70,T=12,B=36,pw=W-L-R,ph=H-T-B;
@@ -221,8 +225,6 @@ for(const [k,label] of DIMS){const g=document.createElement("div");g.className="
     c.onclick=()=>{sel[k].has(v)?sel[k].delete(v):sel[k].add(v);c.setAttribute("aria-pressed",sel[k].has(v));draw()};g.lastChild.append(c)});groups.append(g)}
 document.getElementById("freset").onclick=()=>{DIMS.forEach(([k])=>sel[k].clear());pan.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false"));draw()};
 btn.onclick=e=>{e.stopPropagation();pan.hidden=!pan.hidden;btn.setAttribute("aria-expanded",!pan.hidden)};
-document.addEventListener("click",e=>{if(!pan.hidden&&!pan.contains(e.target)&&e.target!==btn){pan.hidden=true;btn.setAttribute("aria-expanded","false")}});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pan.hidden){pan.hidden=true;btn.setAttribute("aria-expanded","false");btn.focus()}});
 draw()})();
 
 </script>
