@@ -146,12 +146,12 @@ ul.plain li::marker{color:var(--accent)}
 <section class="band warm">
   <div class="wrap">
     <div class="eyebrow">Item level · 9 fastest brands · 9,253 listings</div>
-    <h2>What makes a $100+ item sell within a week</h2>
-    <p class="lead">Ranked from the biggest help to the biggest hurt. Each bar compares items with that trait to their own brand's 7-day sell rate (17% on average). Right of the line sells faster, left sells slower.</p>
+    <h2>What correlates with a $100+ item selling within a week</h2>
+    <p class="lead">Ranked from strongest link to faster sales to strongest link to slower sales. Each bar compares items with that trait to their own brand's 7-day sell rate (17% on average). These are correlations, not proven causes.</p>
     <div class="drivers" id="drivers"></div>
     <div class="cards">
       <div class="card"><h3>Listings sell early or not at all</h3><p>64% of eventual sales happen in the first 7 days. 71% of fast sales came after the seller cut the price, vs 84% of slower sales.</p></div>
-      <div class="card"><h3>Extra effort didn't help</h3><p>10+ photos, a video or a long description went with slower sales, even among similarly priced items. This is a correlation, not proof that photos hurt.</p></div>
+      <div class="card"><h3>More effort, slower sales</h3><p>10+ photos, a video or a long description went with slower sales, even among similarly priced items. Pro resellers may explain part of this.</p></div>
       <div class="card"><h3>Season matters</h3><p>Data is from October–November, which lifts coats and sweaters and hurts shorts. Expect these to flip in spring.</p></div>
     </div>
     <p class="note">Data is from 9 brands: Dôen, Sézane, Orseund Iris, Paloma Wool, Realisation Par, Lemaire, Maison Margiela, Khaite and The Row. "Resellers" are sellers with 6+ of these listings in the data.</p>
@@ -182,7 +182,7 @@ for(const [n,p,price] of D){
   r.innerHTML=`<div class="name" title="${n}">${n}</div><div class="track"><div class="bar" style="width:${p/20*100}%;background:var(--${kind})"></div></div><div class="val"><b>${p}%</b> $${price}</div>`;
   el.appendChild(r);
 }
-const G=[["Do · biggest impact first",[["Price at 0.6x the brand median or less",1.66],["Ask under 35% of retail",1.6],["Bags",1.57],["Jackets & coats",1.53],["One-size items",1.46],["Ask 35–55% of retail",1.45],["Brown",1.44],["Price at 0.6–0.9x the median",1.33],["Green",1.28],["Sweaters",1.27],["Used, like new",1.25],["4–6 photos",1.23],["Size S or M",1.15]]],["No real difference",[["Day of the week listed",1.0],["Listed morning or afternoon",1.05],["Black or blue",1.0],["Tops, skirts, shoes",1.07]]],["Don't · least harmful first",[["List in the evening",0.85],["New with tags",0.86],["XS or smaller",0.82],["L / 10 or larger",0.78],["Description over 400 characters",0.77],["Dresses",0.74],["Ask 75%+ of retail",0.7],["10+ photos",0.7],["Jeans",0.7],["Pink",0.7],["Selling as a reseller (6+ listings)",0.69],["Price above 1.3x the median",0.63],["Pants & jumpsuits",0.55],["Adding a video",0.55],["Shorts",0.41]]]];
+const G=[["Linked to faster sales · strongest first",[["Price at 0.6x the brand median or less",1.66],["Ask under 35% of retail",1.6],["Bags",1.57],["Jackets & coats",1.53],["One-size items",1.46],["Ask 35–55% of retail",1.45],["Brown",1.44],["Price at 0.6–0.9x the median",1.33],["Green",1.28],["Sweaters",1.27],["Used, like new",1.25],["4–6 photos",1.23],["Size S or M",1.15]]],["No real difference",[["Day of the week listed",1.0],["Listed morning or afternoon",1.05],["Black or blue",1.0],["Tops, skirts, shoes",1.07]]],["Linked to slower sales · weakest first",[["List in the evening",0.85],["New with tags",0.86],["XS or smaller",0.82],["L / 10 or larger",0.78],["Description over 400 characters",0.77],["Dresses",0.74],["Ask 75%+ of retail",0.7],["10+ photos",0.7],["Jeans",0.7],["Pink",0.7],["Selling as a reseller (6+ listings)",0.69],["Price above 1.3x the median",0.63],["Pants & jumpsuits",0.55],["Adding a video",0.55],["Shorts",0.41]]]];
 const dv=document.getElementById("drivers");
 for(const [t,rows] of G){
   const g=document.createElement("div");g.className="dgroup";g.innerHTML=`<h3>${t}</h3>`;
