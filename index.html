@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}</style>
-<title>Resale Speed Index</title>
+<title>Shopping Therapy</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -98,6 +98,59 @@ ul.plain li::marker{color:var(--accent)}
 .survempty{position:absolute;inset:0;display:none;align-items:center;justify-content:center;color:var(--muted);font-size:.95rem;pointer-events:none}
 @media (max-width:520px){.row,.axis{grid-template-columns:104px 1fr 84px}.band{padding-block:52px}}
 </style>
+<style>
+/* Shopping Therapy chat (default view) + Stats slide overlay */
+.app{min-height:100dvh;display:flex;flex-direction:column}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+.brand{font-family:var(--display);font-weight:700;font-size:1.25rem;letter-spacing:-.02em}
+.brand span{color:var(--mine)}
+.thread{flex:1;width:100%;max-width:760px;margin:0 auto;padding:28px 16px 16px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box}
+.hello{display:flex;flex-direction:column;gap:14px;padding:6vh 0 8px}
+.hello h1{font-size:clamp(2rem,6vw,3.2rem)}
+.starters{display:flex;flex-wrap:wrap;gap:8px}
+.starters .chip{text-align:left}
+.msg{max-width:88%;line-height:1.55;overflow-wrap:anywhere}
+.msg.user{align-self:flex-end;background:var(--mine);color:var(--bg);padding:10px 14px;border-radius:18px 18px 4px 18px;white-space:pre-wrap}
+.msg.bot{align-self:flex-start;display:flex;flex-direction:column;gap:8px}
+.msg.bot ul,.msg.bot ol{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+.msg.bot li::marker{color:var(--mine)}
+.msg.err{color:var(--mine);font-size:.9rem}
+.working{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+.working::before{content:"▸ ";color:var(--accent)}
+.composer{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 24%);padding:20px 16px max(16px,env(safe-area-inset-bottom,0px))}
+.composer form{max-width:760px;margin:0 auto;display:flex;gap:8px;align-items:flex-end;background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:6px 6px 6px 16px}
+.composer form:focus-within{border-color:var(--muted)}
+.composer textarea{flex:1;font:inherit;color:var(--ink);background:transparent;border:0;outline:0;resize:none;max-height:160px;padding:8px 0;min-width:0}
+.send{font:inherit;font-weight:600;border:0;border-radius:999px;background:var(--mine);color:var(--bg);padding:9px 16px;cursor:pointer}
+.send:disabled{opacity:.4;cursor:default}
+#stats{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain}
+#stats[hidden]{display:none}
+#stats .band{min-height:100dvh;box-sizing:border-box;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center}
+#stats .wrap{width:100%}
+.sbar{position:sticky;top:0;z-index:2;height:0;display:flex;justify-content:space-between;align-items:flex-start;padding:0 max(16px,env(safe-area-inset-left,0px))}
+.sbar>*{margin-top:14px}
+#scount{font-family:var(--mono);font-size:.78rem;color:var(--muted);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+</style>
+<div class="app" id="app">
+  <header class="top"><div class="brand">Shopping <span>Therapy</span></div>
+    <button type="button" class="fbtn" id="statsbtn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 14h12M4 11V7M8 11V3M12 11V8"/></svg>Stats</button></header>
+  <main class="thread" id="thread" aria-live="polite">
+    <div class="hello" id="hello">
+      <div class="eyebrow">Resale advisor · 47,680 Poshmark listings $100+</div>
+      <h1>What are you selling?</h1>
+      <p class="lead">Describe the piece (brand, type, size, condition, what it cost new) and I'll suggest a price and how fast it should go.</p>
+      <div class="starters" id="starters">
+        <button type="button" class="chip">Khaite cashmere sweater, size S, like new, retail $1,100. What should I list it at?</button>
+        <button type="button" class="chip">Dôen dress, size M, used good. How fast will it sell at $150?</button>
+        <button type="button" class="chip">Will a Ganni jacket sell, or should I donate it?</button>
+      </div>
+    </div>
+  </main>
+  <div class="composer"><form id="form"><textarea id="q" rows="1" placeholder="Ask about a piece…" aria-label="Ask about a piece"></textarea><button class="send" id="send">Ask</button></form></div>
+</div>
+
+<div id="stats" hidden role="dialog" aria-label="Stats">
+<div class="sbar"><button type="button" class="fbtn" id="statsclose">← Chat</button><span id="scount"></span></div>
 
 <section class="band hero">
   <div class="wrap">
@@ -155,6 +208,7 @@ ul.plain li::marker{color:var(--accent)}
     </ul>
   </div>
 </section>
+</div>
 
 <script>
 const D=[["Dôen",18,200],["Sézane",17,135],["Orseund Iris",15,200],["Paloma Wool",14,200],["Realisation Par",14,150],["Lemaire",13,661],["Maison Margiela",13,350],["Khaite",12,450],["The Row",11,468],["Toteme",9,349],["St. Agni",9,197],["Staud",7,198],["Mirror Palais",7,400],["Cult Gaia",6,250],["Reformation",5,150],["Simone Rocha",5,325],["Cecilie Bahnsen",5,400],["Miu Miu",5,1121],["Ganni",5,165],["Jacquemus",5,450],["Djerf Avenue",4,120],["Guizio",3,150],["Rouje",3,150],["LoveShackFancy",2,180],["For Love & Lemons",2,138],["Posse",2,158],["Ulla Johnson",2,185],["Sandy Liang",2,225],["Miaou",1,148],["Christopher Esber",1,355],["House of Sunny",1,120],["Buci",0,255],["Nanushka",0,185]];
@@ -187,7 +241,7 @@ const FD={"dims":{"b":["Dôen","Sézane","Khaite","Lemaire","Maison Margiela","O
 const sel={};DIMS.forEach(([k])=>sel[k]=new Set());
 const km=T=>{T.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);let S=1,n=0,i=0;for(const r of T)n+=r[2];const p=[];
   for(let g=0;g<=MAXD;g++){while(i<T.length&&T[i][0]<=g){const r=T[i];if(r[1])S*=1-r[2]/n;n-=r[2];i++}if(n<20)break;p.push(S)}return p};
-function compute(){const per=Array.from({length:FD.dims.b.length},()=>[]);let cnt=0;
+function compute(sel){const per=Array.from({length:FD.dims.b.length},()=>[]);let cnt=0;
   for(let i=0;i<N;i++){let ok=true;for(const [k] of DIMS){const s=sel[k];if(s.size&&!s.has(C[k][i])){ok=false;break}}if(ok){per[C.b[i]].push(i);cnt++}}
   const ob=[],co=[];
   for(const I of per){if(!I.length)continue;const T=I.map(i=>[C.t[i]/10,C.e[i],1]),ac=new Array(MAXD+1).fill(0);
@@ -201,7 +255,7 @@ const x=d=>L+d/MAXD*pw,y=v=>T+(1-v)*ph,ns="http://www.w3.org/2000/svg",P=a=>a.ma
 const s=document.createElementNS(ns,"svg");s.setAttribute("viewBox",`0 0 ${W} ${H}`);box.prepend(s);
 const empty=document.createElement("div");empty.className="survempty";empty.textContent="Too few listings match these filters.";box.append(empty);
 let cur;
-function draw(){cur=compute();const {O,C:Co}=cur,n=O.length-1;let g="";
+function draw(){cur=compute(sel);const {O,C:Co}=cur,n=O.length-1;let g="";
   for(const v of [0,.25,.5,.75,1])g+=`<line x1="${L}" x2="${L+pw}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end" font-size="12" fill="var(--muted)" font-family="var(--mono)">${v}</text>`;
   for(let m=0;m*30.44<=MAXD+1;m++)g+=`<text x="${x(Math.min(MAXD,m*30.44))}" y="${H-12}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="var(--mono)">${m}mo</text>`;
   empty.style.display=n<1?"flex":"none";
@@ -225,7 +279,98 @@ for(const [k,label] of DIMS){const g=document.createElement("div");g.className="
     c.onclick=()=>{sel[k].has(v)?sel[k].delete(v):sel[k].add(v);c.setAttribute("aria-pressed",sel[k].has(v));draw()};g.lastChild.append(c)});groups.append(g)}
 document.getElementById("freset").onclick=()=>{DIMS.forEach(([k])=>sel[k].clear());pan.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false"));draw()};
 btn.onclick=e=>{e.stopPropagation();pan.hidden=!pan.hidden;btn.setAttribute("aria-expanded",!pan.hidden)};
-draw()})();
+window.ST_compute=compute;draw()})();
 
+</script>
+<script>
+(()=>{
+const PROXY=new URLSearchParams(location.search).get("proxy")||"https://shopping-therapy.REPLACE_SUBDOMAIN.workers.dev";
+const $=id=>document.getElementById(id);
+const thread=$("thread"),form=$("form"),q=$("q"),send=$("send");
+const norm=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+const ITEM=new Set(FD.dims.b);
+const findBrand=name=>D.find(d=>norm(d[0])===norm(name))||D.find(d=>norm(d[0]).includes(norm(name))&&norm(name).length>2);
+const TOOLS={
+  brand_stats({brand}){
+    const row=d=>({brand:d[0],pct_sold_within_7d:d[1],median_ask_usd:d[2],item_level_data:ITEM.has(d[0])});
+    if(!brand)return D.map(row);
+    const d=findBrand(brand);return d?row(d):{error:`${brand} is not in the data`,known_brands:D.map(d=>d[0])};
+  },
+  drivers(){return G.map(([group,rows])=>({group,factors:rows.map(([f,x])=>({factor:f,multiplier:x}))}))},
+  sell_odds(f){
+    const sel={b:new Set(),d:new Set(),y:new Set(),s:new Set(),c:new Set()};
+    if(f.brand){const d=findBrand(f.brand),i=d?FD.dims.b.indexOf(d[0]):-1;
+      if(i<0)return {error:`No item-level data for ${f.brand}. Item-level brands: ${FD.dims.b.join(", ")}. Use brand_stats instead.`};sel.b.add(i)}
+    for(const [k,dk] of [["type","y"],["size","s"],["condition","c"],["price_vs_retail","d"]])if(f[k]){
+      const i=FD.dims[dk].indexOf(f[k]);if(i<0)return {error:`Unknown ${k}: ${f[k]}`};sel[dk].add(i)}
+    const r=ST_compute(sel),n=r.O.length-1;
+    if(n<8)return {listings:r.cnt,error:"Too few matching listings for a reliable estimate. Drop a filter."};
+    const out={listings:r.cnt,brands:r.brands,sold_pct_range:{}};
+    for(const d of [7,30,90,180])if(d<=n)out.sold_pct_range[`day_${d}`]=[Math.round((1-r.C[d])*100),Math.round((1-r.O[d])*100)];
+    out.data_ends_day=n;return out}
+};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const md=t=>{const out=[];let list=null;
+  for(const raw of esc(t).split("\n")){const l=raw.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>"),m=l.match(/^\s*(?:[-*•]|(\d+)\.)\s+(.*)/);
+    if(m){const tag=m[1]?"ol":"ul";if(!list||list.tag!==tag){list={tag,items:[]};out.push(list)}list.items.push(m[2]);continue}
+    list=null;if(l.trim())out.push(`<p>${l}</p>`)}
+  return out.map(o=>typeof o==="string"?o:`<${o.tag}>${o.items.map(i=>`<li>${i}</li>`).join("")}</${o.tag}>`).join("")};
+const add=(cls,html)=>{const d=document.createElement("div");d.className="msg "+cls;d.innerHTML=html;thread.append(d);d.scrollIntoView({block:"end",behavior:"smooth"});return d};
+const history=[];let busy=false;
+
+async function turn(onText){
+  const res=await fetch(PROXY,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({messages:history})});
+  if(!res.ok){let e;try{e=(await res.json()).error}catch{e=res.statusText}throw new Error(e||("HTTP "+res.status))}
+  const rd=res.body.getReader(),dec=new TextDecoder(),blocks=[],raw={};let buf="",stop=null;
+  for(;;){const {done,value}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let k;
+    while((k=buf.indexOf("\n\n"))>=0){const ev=buf.slice(0,k);buf=buf.slice(k+2);
+      const line=ev.split("\n").find(l=>l.startsWith("data:"));if(!line)continue;const e=JSON.parse(line.slice(5));
+      if(e.type==="content_block_start"){blocks[e.index]={...e.content_block};if(e.content_block.type==="tool_use")raw[e.index]=""}
+      else if(e.type==="content_block_delta"){const b=blocks[e.index],d=e.delta;
+        if(d.type==="text_delta"){b.text+=d.text;onText(blocks.filter(x=>x&&x.type==="text").map(x=>x.text).join(""))}
+        else if(d.type==="input_json_delta")raw[e.index]+=d.partial_json;
+        else if(d.type==="thinking_delta")b.thinking=(b.thinking||"")+d.thinking;
+        else if(d.type==="signature_delta")b.signature=(b.signature||"")+d.signature}
+      else if(e.type==="content_block_stop"&&e.index in raw){try{blocks[e.index].input=JSON.parse(raw[e.index]||"{}")}catch{blocks[e.index].input={};blocks[e.index]._bad=true}}
+      else if(e.type==="message_delta")stop=e.delta.stop_reason;
+      else if(e.type==="error")throw new Error(e.error?.message||"stream error")}}
+  return {blocks:blocks.filter(Boolean),stop}}
+
+async function ask(text){
+  if(busy||!text.trim())return;busy=true;send.disabled=true;$("hello")?.remove();
+  add("user",esc(text));history.push({role:"user",content:text});
+  const bot=add("bot",'<div class="working">Thinking…</div>');let prev="";
+  try{
+    for(let i=0;i<8;i++){
+      const {blocks,stop}=await turn(t=>{bot.innerHTML=md(prev+t)});
+      const clean=blocks.map(({_bad,...b})=>b);history.push({role:"assistant",content:clean});
+      const said=blocks.filter(b=>b.type==="text").map(b=>b.text).join("");if(said)prev+=said+"\n\n";
+      if(stop==="refusal"){bot.innerHTML=md(prev)+'<div class="msg err">Sorry, I can\'t help with that one.</div>';break}
+      if(stop!=="tool_use"){bot.innerHTML=md(prev)||'<div class="msg err">No answer came back. Try rephrasing.</div>';break}
+      const calls=blocks.filter(b=>b.type==="tool_use");
+      bot.innerHTML=md(prev)+'<div class="working">Checking the data…</div>';
+      history.push({role:"user",content:calls.map(c=>{let out,err=false;
+        try{if(c._bad)throw new Error("invalid tool input JSON");out=JSON.stringify(TOOLS[c.name](c.input||{}))}catch(e){out=String(e.message);err=true}
+        return {type:"tool_result",tool_use_id:c.id,content:out,is_error:err}})})}
+  }catch(e){bot.remove();add("err",esc("Couldn't reach the advisor: "+e.message));
+    while(history.length&&history[history.length-1].role!=="user")history.pop();history.pop()}
+  busy=false;send.disabled=false;q.focus()}
+
+form.onsubmit=e=>{e.preventDefault();const t=q.value;q.value="";q.style.height="";ask(t)};
+q.addEventListener("input",()=>{q.style.height="";q.style.height=q.scrollHeight+"px"});
+q.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
+$("starters").addEventListener("click",e=>{if(e.target.matches(".chip"))ask(e.target.textContent)});
+
+// Stats: the original report as full-screen snap-scrolling slides
+const stats=$("stats"),slides=[...stats.querySelectorAll(".band")],cnt=$("scount");
+const cur=()=>{let k=0;slides.forEach((el,i)=>{if(el.offsetTop<=stats.scrollTop+stats.clientHeight/3)k=i});return k};
+const upd=()=>cnt.textContent=`${Math.min(cur()+1,slides.length)} / ${slides.length}`;
+const go=i=>slides[Math.max(0,Math.min(slides.length-1,i))].scrollIntoView({behavior:"smooth"});
+const open=()=>{stats.hidden=false;stats.scrollTop=0;upd();$("statsclose").focus()},close=()=>{stats.hidden=true;$("statsbtn").focus()};
+$("statsbtn").onclick=open;$("statsclose").onclick=close;stats.addEventListener("scroll",upd,{passive:true});
+document.addEventListener("keydown",e=>{if(stats.hidden)return;if(e.key==="Escape")return close();if(e.target.closest("input,textarea")||(e.key===" "&&e.target.closest("button")))return;
+  if(["ArrowDown","ArrowRight","PageDown"," "].includes(e.key)){e.preventDefault();go(cur()+1)}
+  else if(["ArrowUp","ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();go(cur()-1)}});
+})();
 </script>
 </html>
